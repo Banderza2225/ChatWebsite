@@ -1,12 +1,72 @@
-<!DOCTYPE html>
+
+    <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="index.css">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Chat+</title>
+
+    <style>
+
+        
+    </style>
 </head>
-<body>
+<body
+
+
+>
+    <div class="container">
     
+     <div class="FormDiv">
+      <form class="login" id="login">
+        <h1>Create account</h1>
+       <br>
+       <input  type="email" id="email" placeholder="Enter Email" required >
+       <br>
+       <input type="password"  id="password" placeholder="Enter password" required >
+       <br>
+       <p id="message"></p>
+       <button class="btn" type="submit" id="CreateBtn" >Create Account</button>
+      </form>
+
+
+     </div>
+    
+    </div>
 </body>
+<script >
+  const login = document.getElementById("login");
+
+login.addEventListener("submit",async function(e){
+
+    e.preventDefault();
+
+    const email=document.getElementById("email").value;
+
+    const password=document.getElementById("password").value;
+
+    const response = await fetch('http://localhost:3000/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await response.json();
+  document.getElementById('message').innerText = data.message;
+
+
+  if (data.message === "User registered successfully!") {
+  window.location.href = "index.html";
+}
+
+});
+
+
+
+</script>
+
 </html>
