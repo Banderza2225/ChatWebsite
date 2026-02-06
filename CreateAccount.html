@@ -58,13 +58,10 @@ login.addEventListener("submit",async function(e){
   const data = await response.json();
   document.getElementById('message').innerText = data.message;
 
-
-  if (data.message === "User registered successfully!") {
+   if (data.message === "User registered successfully!") {
   window.location.href = "index.html";
 }
-
 });
-
 
 
 </script>
