@@ -3,6 +3,7 @@ const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
+const fs = require("fs");
 
 const app = express();
 app.use(express.json()); 
@@ -11,15 +12,12 @@ app.use(cors());
 const db = new sqlite3.Database("users.db");
 
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE,
-    password TEXT,
-    theme INTEGER
-  )
-`);
+const sql = fs.readFileSync("DataBase.sql").toString();
 
+db.exec(sql, (err) => {
+  if (err) console.log("Database error:", err);
+  else console.log("Sqlite page running succsesfully");
+});
 
 app.post('/register', async (req, res) => {
   const { email, password} = req.body;
@@ -57,7 +55,7 @@ app.post("/login", (req, res) => {
                       }
 
        });
-    } else {
+    } else { 
       res.json({ message: "Incorrect password!" });
     }
   });
