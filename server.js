@@ -61,6 +61,38 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.post("/retreiveConnections&RequestsData", (req, res) => {
+  const { userId} = req.body;
+  
+
+  db.all("SELECT userId, userId2 FROM connections WHERE userId = ? OR userId2 =? ", [userId,userId], (err, rows) => {
+    
+   if (err) return res.status(500).json({ message: "Database error" });
+
+   const connectionsIds= rows.map(row=> row.userId===userId? row.userId2:row.userId);
+   
+  const placeholders = connectionsIds.map(() => "?").join(",");
+
+                if(connectionsIds.length===0){return res.json({ Connections:[],Ids:[]})}
+
+    
+       db.all(`SELECT * FROM users WHERE id IN (${placeholders})`,connectionsIds,(err,connections) =>{
+
+            
+        db.all("SELECT senderId FROM requests WHERE receiverId= ?",[userId],(err,requests)=>{
+
+     
+
+            res.json({ 
+                Connections:connections,
+                Ids: connectionsIds,
+                Requests:requests
+
+                       });
+         });
+       });
+    });
+});
   
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
