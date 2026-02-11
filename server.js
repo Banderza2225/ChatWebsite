@@ -61,39 +61,143 @@ app.post("/login", (req, res) => {
   });
 });
 
-app.post("/retreiveConnections&RequestsData", (req, res) => {
-  const { userId} = req.body;
+app.post("/retreiveConnectionsData", (req, res) => {
+  const userId = Number(req.body.userId); 
+
   
+  db.all(
+    "SELECT userId, userId2 FROM connections WHERE userId = ? OR userId2 = ?",
+    [userId, userId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ message: "Database error" });
 
-  db.all("SELECT userId, userId2 FROM connections WHERE userId = ? OR userId2 =? ", [userId,userId], (err, rows) => {
-    
-   if (err) return res.status(500).json({ message: "Database error" });
+      const connectionsIds = rows.map(row => (row.userId === userId ? row.userId2 : row.userId));
 
-   const connectionsIds= rows.map(row=> row.userId===userId? row.userId2:row.userId);
-   
-  const placeholders = connectionsIds.map(() => "?").join(",");
+      if (connectionsIds.length === 0) {
+       
+        db.all(
+          "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
+          [userId],
+          (err, requests) => {
+            if (err) return res.status(500).json({ message: "Database error" });
+            return res.json({ Connections: [], Ids: [], Requests: requests });
+          }
+        );
+        return;
+      }
 
-                if(connectionsIds.length===0){return res.json({ Connections:[],Ids:[]})}
+      
+      const placeholders = connectionsIds.map(() => "?").join(",");
+      db.all(`SELECT * FROM users WHERE id IN (${placeholders})`, connectionsIds, (err, connections) => {
+        if (err) return res.status(500).json({ message: "Database error" });
 
-    
-       db.all(`SELECT * FROM users WHERE id IN (${placeholders})`,connectionsIds,(err,connections) =>{
+        
+        db.all(
+          "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
+          [userId],
+          (err, requests) => {
+            if (err) return res.status(500).json({ message: "Database error" });
 
-            
-        db.all("SELECT senderId FROM requests WHERE receiverId= ?",[userId],(err,requests)=>{
-
-     
-
-            res.json({ 
-                Connections:connections,
-                Ids: connectionsIds,
-                Requests:requests
-
-                       });
-         });
-       });
-    });
+            res.json({
+              Connections: connections,
+              Ids: connectionsIds,
+              Requests: requests
+            });
+          }
+        );
+      });
+    }
+  );
 });
+
   
+app.post("/sendConnctionRequest", (req, res) => {
+  let { senderId, receiverId } = req.body;
+
+  
+  senderId = Number(senderId);
+  receiverId = Number(receiverId);
+
+  if (senderId === receiverId) {
+    return res.json({ message: "You can't add yourself as a friend" });
+  }
+
+
+  db.get(
+    `SELECT userId, userId2 
+     FROM connections 
+     WHERE (userId = ? AND userId2 = ?) OR (userId = ? AND userId2 = ?)`,
+    [senderId, receiverId, receiverId, senderId],
+    (err, connection) => {
+      if (err) return res.status(500).json({ message: "Database error" });
+      if (connection) return res.json({ message: "This person is already your friend" });
+
+  
+      db.get(
+        "SELECT senderId, receiverId FROM requests WHERE senderId = ? AND receiverId = ?",
+        [senderId, receiverId],
+        (err, existingRequest) => {
+          if (err) return res.status(500).json({ message: "Database error" });
+          if (existingRequest) return res.json({ message: "You already sent this person a request" });
+
+         
+          db.run(
+            "INSERT INTO requests(senderId, receiverId) VALUES(?, ?)",
+            [senderId, receiverId],
+            function(err) {
+              if (err) return res.status(500).json({ message: "Error sending connection request" });
+              res.json({ message: "Connection request sent successfully" });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+
+app.post("/acceptRequest", (req, res) => {
+  const { userId, senderId } = req.body;
+  
+  db.get(
+    "SELECT * FROM requests WHERE senderId=? AND receiverId=?",
+    [senderId, userId],
+    (err, request) => {
+      if (err) return res.status(500).json({ message: "Database error" });
+
+      if (!request) {
+        return res.json({ message: "No such friend request found" });
+      }
+
+      
+      const user1 = Math.min(userId, senderId); 
+      const user2 = Math.max(userId, senderId);
+
+      db.run(
+        "INSERT INTO connections(userId, userId2) VALUES(?, ?)",
+        [user1, user2],
+        function (err) {
+          if (err) return res.status(500).json({ message: "Error adding friend" });
+
+          
+          db.run(
+            "DELETE FROM requests WHERE senderId=? AND receiverId=?",
+            [senderId, userId],
+            function (err) {
+              if (err) return res.status(500).json({ message: "Error deleting request" });
+
+              res.json({ message: "Friend request accepted successfully" });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+
+
+
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
 });

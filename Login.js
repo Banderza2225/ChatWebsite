@@ -1,14 +1,14 @@
 const login = document.getElementById("login");
 
 login.addEventListener("click",async function(e){
-
+   const API = "https://proliferous-inconclusively-callen.ngrok-free.dev";
     e.preventDefault();
 
     const email=document.getElementById("email").value;
 
     const password=document.getElementById("password").value;
 
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch(API+"/login", {
     method: "POST",
     headers: { "Content-Type": "application/json"},
     body: JSON.stringify({ email, password })
@@ -25,7 +25,7 @@ login.addEventListener("click",async function(e){
 
 });
 
-
+  
 
 
 
