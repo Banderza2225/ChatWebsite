@@ -195,9 +195,45 @@ app.post("/acceptRequest", (req, res) => {
   );
 });
 
+app.post("/sendMessage", (req, res) => {
+  const { senderId, receiverId, message } = req.body;
 
+  if (!message || message.trim() === "") {
+    return res.json({ message: "Message cannot be empty" });
+  }
 
+  db.run(
+    `INSERT INTO messages (senderId, receiverId, message) 
+     VALUES (?, ?, ?)`,
+    [senderId, receiverId, message],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ message: "Database error" });
+      }
 
+      res.json({ message: "Message sent successfully" });
+    }
+  );
+});
+
+app.post("/getMessages", (req, res) => {
+  const { userId, otherUserId } = req.body;
+
+  db.all(
+    `SELECT * FROM messages 
+     WHERE (senderId = ? AND receiverId = ?)
+        OR (senderId = ? AND receiverId = ?)
+     ORDER BY timestamp ASC`,
+    [userId, otherUserId, otherUserId, userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      res.json({ messages: rows });
+    }
+  );
+});
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
 });

@@ -1,7 +1,7 @@
 const login = document.getElementById("login");
 
 login.addEventListener("click",async function(e){
-   const API = "https://proliferous-inconclusively-callen.ngrok-free.dev";
+   const API = "http://localhost:3000";
     e.preventDefault();
 
     const email=document.getElementById("email").value;
