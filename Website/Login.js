@@ -8,7 +8,7 @@ login.addEventListener("click",async function(e){
 
     const password=document.getElementById("password").value;
 
-    const response = await fetch(API+"/login", {
+    const response = await fetch(API+"login", {
     method: "POST",
     headers: { "Content-Type": "application/json"},
     body: JSON.stringify({ email, password })
