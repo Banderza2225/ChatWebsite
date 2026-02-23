@@ -1,7 +1,7 @@
 const login = document.getElementById("login");
 
 login.addEventListener("click",async function(e){
-   const API = "http://localhost:3000";
+   const API = "https://chatwebsite-fws0.onrender.com/";
     e.preventDefault();
 
     const email=document.getElementById("email").value;
