@@ -9,11 +9,22 @@
     input, button { padding: 5px; margin: 5px 0; }
     .section { margin-bottom: 20px; }
     .request, .connection { margin-bottom: 5px; }
+    .userInfo{
+       display: block;
+
+
+    }
+    .chat-section{
+display: block;
+      width: 500px;
+
+    }
   </style>
 </head>
 <body>
   <h2 id="userInfo"></h2>
-
+<div>
+  <div class="infoDiv">
   <div class="section">
     <h3>Connections</h3>
     <div id="connections">Loading...</div>
@@ -30,6 +41,7 @@
     <button id="sendRequestBtn">Send Request</button>
     <p id="sendMessage"></p>
   </div>
+</div>
 
   <div class="chat-section">
   <h3 id="chatTitle">Select a friend to chat</h3>
@@ -38,6 +50,7 @@
 
   <input type="text" id="messageInput" placeholder="Type message..." />
   <button id="sendMessageBtn">Send</button>
+  </div>
 </div>
 
 <script>

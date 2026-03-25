@@ -1,120 +1,102 @@
 
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
-const fs = require("fs");
+const { Pool } = require("pg");
 
 const app = express();
-app.use(express.json()); 
+app.use(express.json());
 app.use(cors());
 
-const db = new sqlite3.Database("users.db");
-
-
-const sql = fs.readFileSync("DataBase.sql").toString();
-
-db.exec(sql, (err) => {
-  if (err) console.log("Database error:", err);
-  else console.log("Sqlite page running succsesfully");
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 app.post('/register', async (req, res) => {
-  const { email, password} = req.body;
-
-  const theme=0;
+  const { email, password } = req.body;
+  const theme = 0;
   const hashedPassword = await bcrypt.hash(password, 10);
 
- 
-  db.run(
-    "INSERT INTO users (email, password,theme) VALUES (?, ?, ?)",
-    [email, hashedPassword,theme],
-    function(err) {
-      if (err) {
-        return res.json({ message: "User already exists or error!" });
-      }
-      res.json({ message: "User registered successfully!" });
-    }
+  try {
+    await pool.query(
+      "INSERT INTO users (email, password, theme) VALUES ($1, $2, $3)",
+      [email, hashedPassword, theme]
+    );
+    res.json({ message: "User registered successfully!" });
+  } catch {
+    res.json({ message: "User already exists or error!" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const result = await pool.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email]
   );
-});
 
+  const user = result.rows[0];
 
-app.post("/login", (req, res) => {
-  const { email, password} = req.body;
+  if (!user) return res.json({ message: "User not found!" });
 
-  db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
-    if (!user) return res.json({ message: "User not found!" });
+  const isMatch = bcrypt.compareSync(password, user.password);
 
-    const isMatch = bcrypt.compareSync(password, user.password);
-    if (isMatch) {
-      res.json({ message: "Login successful!",
-                 user:{
-                      id:   user.id,
-                     email: user.email,
-                     theme: user.theme
-                      }
-
-       });
-    } else { 
-      res.json({ message: "Incorrect password!" });
-    }
-  });
-});
-
-app.post("/retreiveConnectionsData", (req, res) => {
-  const userId = Number(req.body.userId); 
-
-  
-  db.all(
-    "SELECT userId, userId2 FROM connections WHERE userId = ? OR userId2 = ?",
-    [userId, userId],
-    (err, rows) => {
-      if (err) return res.status(500).json({ message: "Database error" });
-
-      const connectionsIds = rows.map(row => (row.userId === userId ? row.userId2 : row.userId));
-
-      if (connectionsIds.length === 0) {
-       
-        db.all(
-          "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
-          [userId],
-          (err, requests) => {
-            if (err) return res.status(500).json({ message: "Database error" });
-            return res.json({ Connections: [], Ids: [], Requests: requests });
-          }
-        );
-        return;
+  if (isMatch) {
+    res.json({
+      message: "Login successful!",
+      user: {
+        id: user.id,
+        email: user.email,
+        theme: user.theme
       }
-
-      
-      const placeholders = connectionsIds.map(() => "?").join(",");
-      db.all(`SELECT * FROM users WHERE id IN (${placeholders})`, connectionsIds, (err, connections) => {
-        if (err) return res.status(500).json({ message: "Database error" });
-
-        
-        db.all(
-          "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
-          [userId],
-          (err, requests) => {
-            if (err) return res.status(500).json({ message: "Database error" });
-
-            res.json({
-              Connections: connections,
-              Ids: connectionsIds,
-              Requests: requests
-            });
-          }
-        );
-      });
-    }
-  );
+    });
+  } else {
+    res.json({ message: "Incorrect password!" });
+  }
 });
 
-  
-app.post("/sendConnctionRequest", (req, res) => {
+app.post("/retreiveConnectionsData", async (req, res) => {
+  const userId = Number(req.body.userId);
+
+  try {
+    const connRes = await pool.query(
+      "SELECT userId, userId2 FROM connections WHERE userId = $1 OR userId2 = $1",
+      [userId]
+    );
+
+    const connectionsIds = connRes.rows.map(row =>
+      row.userid === userId ? row.userid2 : row.userid
+    );
+
+    const reqRes = await pool.query(
+      "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = $1",
+      [userId]
+    );
+
+    if (connectionsIds.length === 0) {
+      return res.json({ Connections: [], Ids: [], Requests: reqRes.rows });
+    }
+
+    const usersRes = await pool.query(
+      `SELECT * FROM users WHERE id = ANY($1)`,
+      [connectionsIds]
+    );
+
+    res.json({
+      Connections: usersRes.rows,
+      Ids: connectionsIds,
+      Requests: reqRes.rows
+    });
+
+  } catch {
+    res.status(500).json({ message: "Database error" });
+  }
+});
+
+app.post("/sendConnctionRequest", async (req, res) => {
   let { senderId, receiverId } = req.body;
-
-  
   senderId = Number(senderId);
   receiverId = Number(receiverId);
 
@@ -122,118 +104,107 @@ app.post("/sendConnctionRequest", (req, res) => {
     return res.json({ message: "You can't add yourself as a friend" });
   }
 
+  try {
+    const existingConn = await pool.query(
+      `SELECT * FROM connections WHERE (userId=$1 AND userId2=$2) OR (userId=$2 AND userId2=$1)`,
+      [senderId, receiverId]
+    );
 
-  db.get(
-    `SELECT userId, userId2 
-     FROM connections 
-     WHERE (userId = ? AND userId2 = ?) OR (userId = ? AND userId2 = ?)`,
-    [senderId, receiverId, receiverId, senderId],
-    (err, connection) => {
-      if (err) return res.status(500).json({ message: "Database error" });
-      if (connection) return res.json({ message: "This person is already your friend" });
-
-  
-      db.get(
-        "SELECT senderId, receiverId FROM requests WHERE senderId = ? AND receiverId = ?",
-        [senderId, receiverId],
-        (err, existingRequest) => {
-          if (err) return res.status(500).json({ message: "Database error" });
-          if (existingRequest) return res.json({ message: "You already sent this person a request" });
-
-         
-          db.run(
-            "INSERT INTO requests(senderId, receiverId) VALUES(?, ?)",
-            [senderId, receiverId],
-            function(err) {
-              if (err) return res.status(500).json({ message: "Error sending connection request" });
-              res.json({ message: "Connection request sent successfully" });
-            }
-          );
-        }
-      );
+    if (existingConn.rows.length > 0) {
+      return res.json({ message: "This person is already your friend" });
     }
-  );
+
+    const existingReq = await pool.query(
+      "SELECT * FROM requests WHERE senderId=$1 AND receiverId=$2",
+      [senderId, receiverId]
+    );
+
+    if (existingReq.rows.length > 0) {
+      return res.json({ message: "You already sent this person a request" });
+    }
+
+    await pool.query(
+      "INSERT INTO requests(senderId, receiverId) VALUES($1, $2)",
+      [senderId, receiverId]
+    );
+
+    res.json({ message: "Connection request sent successfully" });
+
+  } catch {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
-
-app.post("/acceptRequest", (req, res) => {
+app.post("/acceptRequest", async (req, res) => {
   const { userId, senderId } = req.body;
-  
-  db.get(
-    "SELECT * FROM requests WHERE senderId=? AND receiverId=?",
-    [senderId, userId],
-    (err, request) => {
-      if (err) return res.status(500).json({ message: "Database error" });
 
-      if (!request) {
-        return res.json({ message: "No such friend request found" });
-      }
+  try {
+    const request = await pool.query(
+      "SELECT * FROM requests WHERE senderId=$1 AND receiverId=$2",
+      [senderId, userId]
+    );
 
-      
-      const user1 = Math.min(userId, senderId); 
-      const user2 = Math.max(userId, senderId);
-
-      db.run(
-        "INSERT INTO connections(userId, userId2) VALUES(?, ?)",
-        [user1, user2],
-        function (err) {
-          if (err) return res.status(500).json({ message: "Error adding friend" });
-
-          
-          db.run(
-            "DELETE FROM requests WHERE senderId=? AND receiverId=?",
-            [senderId, userId],
-            function (err) {
-              if (err) return res.status(500).json({ message: "Error deleting request" });
-
-              res.json({ message: "Friend request accepted successfully" });
-            }
-          );
-        }
-      );
+    if (request.rows.length === 0) {
+      return res.json({ message: "No such friend request found" });
     }
-  );
+
+    const user1 = Math.min(userId, senderId);
+    const user2 = Math.max(userId, senderId);
+
+    await pool.query(
+      "INSERT INTO connections(userId, userId2) VALUES($1, $2)",
+      [user1, user2]
+    );
+
+    await pool.query(
+      "DELETE FROM requests WHERE senderId=$1 AND receiverId=$2",
+      [senderId, userId]
+    );
+
+    res.json({ message: "Friend request accepted successfully" });
+
+  } catch {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
-app.post("/sendMessage", (req, res) => {
+app.post("/sendMessage", async (req, res) => {
   const { senderId, receiverId, message } = req.body;
 
   if (!message || message.trim() === "") {
     return res.json({ message: "Message cannot be empty" });
   }
 
-  db.run(
-    `INSERT INTO messages (senderId, receiverId, message) 
-     VALUES (?, ?, ?)`,
-    [senderId, receiverId, message],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ message: "Database error" });
-      }
+  try {
+    await pool.query(
+      "INSERT INTO messages (senderId, receiverId, message) VALUES ($1, $2, $3)",
+      [senderId, receiverId, message]
+    );
 
-      res.json({ message: "Message sent successfully" });
-    }
-  );
+    res.json({ message: "Message sent successfully" });
+  } catch {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
-app.post("/getMessages", (req, res) => {
+app.post("/getMessages", async (req, res) => {
   const { userId, otherUserId } = req.body;
 
-  db.all(
-    `SELECT * FROM messages 
-     WHERE (senderId = ? AND receiverId = ?)
-        OR (senderId = ? AND receiverId = ?)
-     ORDER BY timestamp ASC`,
-    [userId, otherUserId, otherUserId, userId],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({ message: "Database error" });
-      }
+  try {
+    const result = await pool.query(
+      `SELECT * FROM messages 
+       WHERE (senderId=$1 AND receiverId=$2)
+          OR (senderId=$2 AND receiverId=$1)
+       ORDER BY timestamp ASC`,
+      [userId, otherUserId]
+    );
 
-      res.json({ messages: rows });
-    }
-  );
+    res.json({ messages: result.rows });
+  } catch {
+    res.status(500).json({ message: "Database error" });
+  }
 });
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
