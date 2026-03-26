@@ -9,50 +9,36 @@
     input, button { padding: 5px; margin: 5px 0; }
     .section { margin-bottom: 20px; }
     .request, .connection { margin-bottom: 5px; }
-    .userInfo{
-       display: block;
-
-
-    }
-    .chat-section{
-display: block;
-      width: 500px;
-
-    }
+    .userInfo { display: block; }
+    .chat-section { display: block; width: 500px; }
   </style>
 </head>
 <body>
   <h2 id="userInfo"></h2>
-<div>
-  <div class="infoDiv">
-  <div class="section">
-    <h3>Connections</h3>
-    <div id="connections">Loading...</div>
+  <div>
+    <div class="infoDiv">
+      <div class="section">
+        <h3>Connections</h3>
+        <div id="connections">Loading...</div>
+      </div>
+      <div class="section">
+        <h3>Pending Requests</h3>
+        <div id="requests">Loading...</div>
+      </div>
+      <div class="section">
+        <h3>Send Connection Request</h3>
+        <input type="number" id="receiverId" placeholder="Enter user ID">
+        <button id="sendRequestBtn">Send Request</button>
+        <p id="sendMessage"></p>
+      </div>
+    </div>
+    <div class="chat-section">
+      <h3 id="chatTitle">Select a friend to chat</h3>
+      <div id="chatBox" style="border:1px solid black; height:300px; overflow-y:auto; padding:10px;"></div>
+      <input type="text" id="messageInput" placeholder="Type message..." />
+      <button id="sendMessageBtn">Send</button>
+    </div>
   </div>
-
-  <div class="section">
-    <h3>Pending Requests</h3>
-    <div id="requests">Loading...</div>
-  </div>
-
-  <div class="section">
-    <h3>Send Connection Request</h3>
-    <input type="number" id="receiverId" placeholder="Enter user ID">
-    <button id="sendRequestBtn">Send Request</button>
-    <p id="sendMessage"></p>
-  </div>
-</div>
-
-  <div class="chat-section">
-  <h3 id="chatTitle">Select a friend to chat</h3>
-
-  <div id="chatBox" style="border:1px solid black; height:300px; overflow-y:auto; padding:10px;"></div>
-
-  <input type="text" id="messageInput" placeholder="Type message..." />
-  <button id="sendMessageBtn">Send</button>
-  </div>
-</div>
-
 <script>
 const user = JSON.parse(localStorage.getItem("UserData"));
 const userInfoEl = document.getElementById("userInfo");
@@ -67,39 +53,26 @@ const chatBox = document.getElementById("chatBox");
 const messageInput = document.getElementById("messageInput");
 const sendMessageBtn = document.getElementById("sendMessageBtn");
 const chatTitle = document.getElementById("chatTitle");
-
 let currentChatUser = null;
+
 async function fetchConnections() {
-
-
-
     try {
-        const res = await fetch( API+"retreiveConnectionsData", {
+        const res = await fetch(API+"retreiveConnectionsData", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId: user.id })
         });
         const data = await res.json();
-
-       
         if (data.Connections.length > 0) {
-            connectionsEl.innerHTML = data.Connections.map(c => `<div class="connection" onclick="openChat(${c.id}, '${c.email}')">${c.email} (ID: ${c.id})</div>` ).join("");
+            connectionsEl.innerHTML = data.Connections.map(c => `<div class="connection" onclick="openChat(${c.id}, '${c.email}')">${c.email} (ID: ${c.id})</div>`).join("");
         } else {
             connectionsEl.textContent = "No connections yet.";
         }
-
-       
         if (data.Requests.length > 0) {
-            requestsEl.innerHTML = data.Requests.map(r => 
-                `<div class="request">
-                    Request from ID: ${r.senderId} 
-                    <button onclick="acceptRequest(${r.senderId})">Accept</button>
-                </div>`
-            ).join("");
+            requestsEl.innerHTML = data.Requests.map(r => `<div class="request">Request from ID: ${r.senderid} <button onclick="acceptRequest(${r.senderid})">Accept</button></div>`).join("");
         } else {
             requestsEl.textContent = "No pending requests.";
         }
-
     } catch(err) {
         console.error(err);
         connectionsEl.textContent = "Error loading connections.";
@@ -113,75 +86,63 @@ async function sendRequest() {
         sendMessageEl.textContent = "Enter a valid user ID";
         return;
     }
-
     try {
         const res = await fetch(API+"sendConnctionRequest", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ senderId: user.id, receiverId })
+            body: JSON.stringify({ senderid: user.id, receiverid: receiverId })
         });
         const data = await res.json();
         sendMessageEl.textContent = data.message;
         receiverIdInput.value = "";
-        fetchConnections(); 
+        fetchConnections();
     } catch(err) {
         console.error(err);
         sendMessageEl.textContent = "Error sending request";
     }
 }
 
-
 async function openChat(id, email) {
-  currentChatUser = id;
-  chatTitle.innerText = "Chat with " + email;
-
-  const res = await fetch(API+"getMessages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user.id,
-      otherUserId: id
-    })
-  });
-
-  const data = await res.json();
-
-  renderMessages(data.messages, email);
-
-  setInterval(() => {
-  if (currentChatUser === id) {
-    openChat(id, email);
-  }
-}, 2000);
+    currentChatUser = id;
+    chatTitle.innerText = "Chat with " + email;
+    const res = await fetch(API+"getMessages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, otherUserId: id })
+    });
+    const data = await res.json();
+    renderMessages(data.messages, email);
+    setInterval(() => {
+        if (currentChatUser === id) {
+            openChat(id, email);
+        }
+    }, 2000);
 }
 
 function renderMessages(messages, otherUserEmail) {
-  chatBox.innerHTML = "";
-
-  messages.forEach(m => {
-    const div = document.createElement("div");
-
-    if (m.senderId === user.id) {
-      div.innerHTML = `<strong>You:</strong> ${m.message}`;
-    } else {
-      div.innerHTML = `<strong>${otherUserEmail}:</strong> ${m.message}`;
-    }
-
-    chatBox.appendChild(div);
-  });
-
-  chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.innerHTML = "";
+    messages.forEach(m => {
+        const div = document.createElement("div");
+        if (m.senderid === user.id) {
+            div.innerHTML = `<strong>You:</strong> ${m.message}`;
+        } else {
+            div.innerHTML = `<strong>${otherUserEmail}:</strong> ${m.message}`;
+        }
+        chatBox.appendChild(div);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
+
 async function acceptRequest(senderId) {
     try {
         const res = await fetch(API+"acceptRequest", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id, senderId })
+            body: JSON.stringify({ userId: user.id, senderid: senderId })
         });
         const data = await res.json();
         alert(data.message);
-        fetchConnections(); 
+        fetchConnections();
     } catch(err) {
         console.error(err);
         alert("Error accepting request");
@@ -189,33 +150,22 @@ async function acceptRequest(senderId) {
 }
 
 sendMessageBtn.addEventListener("click", async () => {
-
-  if (!currentChatUser) {
-    alert("Select a friend first");
-    return;
-  }
-
-  const message = messageInput.value.trim();
-  if (!message) return;
-
-  await fetch(API + "sendMessage", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      senderId: user.id,
-      receiverId: currentChatUser,
-      message
-    })
-  });
-
-  messageInput.value = "";
-
-
-  openChat(currentChatUser, chatTitle.innerText.replace("Chat with ", ""));
+    if (!currentChatUser) {
+        alert("Select a friend first");
+        return;
+    }
+    const message = messageInput.value.trim();
+    if (!message) return;
+    await fetch(API + "sendMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ senderid: user.id, receiverid: currentChatUser, message })
+    });
+    messageInput.value = "";
+    openChat(currentChatUser, chatTitle.innerText.replace("Chat with ", ""));
 });
+
 sendRequestBtn.addEventListener("click", sendRequest);
-
-
 fetchConnections();
 </script>
 </body>
