@@ -54,6 +54,7 @@ const messageInput = document.getElementById("messageInput");
 const sendMessageBtn = document.getElementById("sendMessageBtn");
 const chatTitle = document.getElementById("chatTitle");
 let currentChatUser = null;
+let chatInterval = null;
 
 async function fetchConnections() {
     try {
@@ -102,20 +103,23 @@ async function sendRequest() {
     }
 }
 
-async function openChat(id, email) {
-    currentChatUser = id;
-    chatTitle.innerText = "Chat with " + email;
-    const res = await fetch(API+"getMessages", {
+async function fetchMessages(id, email) {
+    const res = await fetch(API + "getMessages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, otherUserId: id })
     });
     const data = await res.json();
     renderMessages(data.messages, email);
-    setInterval(() => {
-        if (currentChatUser === id) {
-            openChat(id, email);
-        }
+}
+
+async function openChat(id, email) {
+    currentChatUser = id;
+    chatTitle.innerText = "Chat with " + email;
+    if (chatInterval) clearInterval(chatInterval);
+    await fetchMessages(id, email);
+    chatInterval = setInterval(() => {
+        if (currentChatUser === id) fetchMessages(id, email);
     }, 2000);
 }
 
@@ -162,7 +166,7 @@ sendMessageBtn.addEventListener("click", async () => {
         body: JSON.stringify({ senderid: user.id, receiverid: currentChatUser, message })
     });
     messageInput.value = "";
-    openChat(currentChatUser, chatTitle.innerText.replace("Chat with ", ""));
+    fetchMessages(currentChatUser, chatTitle.innerText.replace("Chat with ", ""));
 });
 
 sendRequestBtn.addEventListener("click", sendRequest);
