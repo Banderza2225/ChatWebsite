@@ -9,7 +9,7 @@ app.use(cors());
 
 
 const pool = new Pool({
-  connectionString: "postgresql://chat_db_my0l_user:tInGm05gp4dv5uP2gECoCyNQGcQHSLtM@dpg-d72gub8gjchc73847uq0-a/chat_db_my0l"
+  connectionString: process.env.DATABASE_URL
 });
 
 
