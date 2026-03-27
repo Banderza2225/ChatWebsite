@@ -3,6 +3,8 @@
 ## Live Demo
  click this link :  https://banderza2225.github.io/ChatWebsite/Website/index.html
 
+*note that you may have to wait up to 50 seconds for the server to respond if it has been inactive for 15 mins.
+
 ## Project Description
 This project is a simple web-based chat application that allows users to send and receive messages in real time.
 
