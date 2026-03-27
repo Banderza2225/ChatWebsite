@@ -1,7 +1,7 @@
 # Chat Website Project
 
 ## Live Demo
- click this link :  https://banderza2225.github.io/ChatWebsite/
+ click this link :  https://banderza2225.github.io/ChatWebsite/Website/index.html
 
 ## Project Description
 This project is a simple web-based chat application that allows users to send and receive messages in real time.
