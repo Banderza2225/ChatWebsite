@@ -1,7 +1,7 @@
 # Chat Website Project
 
 ## Live Demo
- click this link : https://your-username.github.io/ChatWebsite/
+ click this link :  https://banderza2225.github.io/ChatWebsite/
 
 ## Project Description
 This project is a simple web-based chat application that allows users to send and receive messages in real time.
@@ -16,7 +16,7 @@ The purpose of this project is to demonstrate understanding of web development c
 
 ## Setup Instructions
 1. Clone the repository:
-   git clone https://github.com/your-username/ChatWebsite.git
+   git clone https://github.com/Banderza2225/ChatWebsite.git
 
 2. Open the project folder
 
