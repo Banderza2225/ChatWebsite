@@ -47,7 +47,7 @@ const requestsEl = document.getElementById("requests");
 const sendRequestBtn = document.getElementById("sendRequestBtn");
 const receiverIdInput = document.getElementById("receiverId");
 const sendMessageEl = document.getElementById("sendMessage");
-const API = "https://chatwebsite-fws0.onrender.com/";
+const API = window.location.hostname==="localhost"?"http://localhost:3000/" :"https://chatwebsite-fws0.onrender.com/";
 userInfoEl.textContent = `Logged in as: ${user.email} (ID: ${user.id})`;
 const chatBox = document.getElementById("chatBox");
 const messageInput = document.getElementById("messageInput");

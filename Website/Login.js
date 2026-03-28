@@ -4,7 +4,7 @@ login.addEventListener("submit", async function(e) {
 
     e.preventDefault();
 
-    const API = "https://chatwebsite-fws0.onrender.com/";
+    const API = window.location.hostname===""?"http://localhost:3000/" :"https://chatwebsite-fws0.onrender.com/";
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
