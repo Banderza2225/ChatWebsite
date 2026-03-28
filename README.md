@@ -1,9 +1,6 @@
 # Chat Website Project
 
-## Live Demo
- click this link :  https://banderza2225.github.io/ChatWebsite/Website/index.html
 
-*note that you may have to wait up to 50 seconds for the server to respond if it has been inactive for 15 mins.
 
 ## Project Description
 This project is a simple web-based chat application that allows users to send and receive messages in real time.
@@ -17,23 +14,34 @@ The purpose of this project is to demonstrate understanding of web development c
 - HTML
 - CSS
 - JavaScript
-- PostgreSQL(originally SQLite but scrapped because of data persistance issues)
+- PostgreSQL(originally SQLite but scrapped for use online because of data persistance issues)
+- SQLite (only if you run it locally)
 - Node.js
 - Render(For hosting server)
+#### Dependancies:
+- pg (to access PostgrSQL database)
+- bcryptjs (For encypting and checking passwords)
+- cors
+- express 
+
 
 ## Setup Instructions
-1. Clone the repository:
-   git clone https://github.com/Banderza2225/ChatWebsite.git
 
-2. Open the project folder
+#### Live Demo
+ If you want to use the online version and be able to use it like a normal chatting website to talk to anyone globally use the link below  
 
-3. Run the project:
-   - Open `index.html` in a browser
-   OR
-   - Run `npm install` and `node server.js` (if backend used)
+ click this link :  https://banderza2225.github.io/ChatWebsite/Website/index.html
 
-## Usage
-- Create account if you dont have one
+*note that you may have to wait up to 50 seconds for the server to respond if it has been inactive for 15 mins.
+
+#### Local Use
+
+if you want to run and use it locally follow these steps:
+
+
+
+## How to Use/Usage
+- Create an account if you dont have one
 - Login to your account
 - Send a request to a user with there ID number
 - Accept a request from your pending request section to make them your connection
@@ -47,8 +55,9 @@ The purpose of this project is to demonstrate understanding of web development c
 
 - **ChatGPT**: Used to help debug JavaScript issues and structure the project
 - **ChatGPT**: Assisted in writing parts of the README and explaining concepts like event listeners and DOM manipulation
+- **Chatgpt**: Used heavily for researching and learning about new technologies and how to implement them into the code
+- **Copilot**: Used to review read.me
 
-All AI-generated suggestions were reviewed, tested, and modified where necessary to ensure understanding.
 
 ## Version Control
 This project was developed using Git with multiple commits showing progress, including:
