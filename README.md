@@ -1,3 +1,4 @@
+
 # Chat Website Project
 
 
@@ -19,10 +20,11 @@ The purpose of this project is to demonstrate understanding of web development c
 - Node.js
 - Render(For hosting server)
 #### Dependancies:
-- pg (to access PostgrSQL database)
+- pg (to access PostgreSQL database)
 - bcryptjs (For encypting and checking passwords)
 - cors
-- express 
+- express
+- fs
 
 
 ## Setup Instructions
@@ -37,6 +39,24 @@ The purpose of this project is to demonstrate understanding of web development c
 #### Local Use
 
 if you want to run and use it locally follow these steps:
+
+Go to the main repo page and press the code button then dowloand the zip file,the file should start downloading :
+<img width="1916" height="784" alt="Screenshot 2026-03-28 185833" src="https://github.com/user-attachments/assets/75d42a46-afed-4afa-8f89-26c27b16e4d3" />
+
+Once its downloaded extrct the zip file:
+<img width="763" height="314" alt="Screenshot 2026-03-28 185921" src="https://github.com/user-attachments/assets/43720c2a-daa3-448a-867e-80b8f64bba3f" />
+
+Go into the ServerAndDatabase page clear the file path and type in cmd and enter:
+<img width="978" height="398" alt="Screenshot 2026-03-28 190224" src="https://github.com/user-attachments/assets/08620d76-1cf2-4427-931e-1dacd3b93ffd" />
+
+in command prompt type in the the command "npm install" then run the command  "node localserver.js" the cmd should print out "Server running on port 3000" and "Sqlite page running succsesfully":
+<img width="1025" height="677" alt="Screenshot 2026-03-28 190351" src="https://github.com/user-attachments/assets/380108c5-e2cc-4c6d-b33d-9713799a691b" />
+
+then go into the Website fol;der and run the index.html file:
+<img width="854" height="412" alt="Screenshot 2026-03-28 190408" src="https://github.com/user-attachments/assets/253e3320-aa5b-43c2-8c8e-fdd3ecd25ae1" />
+
+The website is running and ready for you to use:
+<img width="1918" height="954" alt="Screenshot 2026-03-28 190531" src="https://github.com/user-attachments/assets/e328acce-42ff-474a-b2fa-c53d0e41a591" />
 
 
 
