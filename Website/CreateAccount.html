@@ -1,69 +1,78 @@
 
     <!DOCTYPE html>
+
 <html lang="en">
 <head>
+   
    <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="index.css">
+  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat+</title>
 
-    <style>
-
-        
-    </style>
+   
 </head>
-<body
-
-
->
+<body>
+    <!-- Main container for centering content -->
     <div class="container">
-    
+
+     <!-- Division for the create account form with styling -->
      <div class="FormDiv">
+      <!-- Create account form with ID for JavaScript handling -->
       <form class="login" id="login">
+        <!-- Page title -->
         <h1>Create account</h1>
        <br>
+       <!-- Input field for email/username -->
        <input   id="email" placeholder="Enter Username" required >
        <br>
+       <!-- Input field for password -->
        <input type="password"  id="password" placeholder="Enter password" required >
        <br>
+       <!-- Paragraph for displaying messages (e.g., errors or success) -->
        <p id="message"></p>
+       <!-- Submit button for creating account -->
        <button class="btn" type="submit" id="CreateBtn" >Create Account</button>
       </form>
 
 
      </div>
-    
+
     </div>
 </body>
+<!-- Inline JavaScript for create account functionality -->
 <script >
+  // Get the create account form element
   const login = document.getElementById("login");
-const API = window.location.hostname==="localhost"?"http://localhost:3000/" :"https://chatwebsite-fws0.onrender.com/";
-login.addEventListener("submit",async function(e){
-
+  // Determine API URL based on hostname
+  const API = window.location.hostname==="localhost"?"http://localhost:3000/" :"https://chatwebsite-fws0.onrender.com/";
+  // Add event listener for form submission
+  login.addEventListener("submit",async function(e){
+    // Prevent default form submission
     e.preventDefault();
-
+    // Get email and password values
     const email=document.getElementById("email").value;
-
     const password=document.getElementById("password").value;
-
+    // Send POST request to register endpoint
     const response = await fetch(API+'register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
   });
-
+  // Parse response
   const data = await response.json();
+  // Display message
   document.getElementById('message').innerText = data.message;
-
+  // Redirect to index.html on successful registration
    if (data.message === "User registered successfully!") {
   window.location.href = "index.html";
 }
 });
-
-
 </script>
 
 </html>

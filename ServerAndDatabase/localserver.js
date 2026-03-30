@@ -1,193 +1,141 @@
+// express: Web framework for building APIs and handling HTTP requests.
 const express = require("express");
 
+// sqlite3: SQLite database driver for Node.js.
 const sqlite3 = require("sqlite3").verbose();
 
+// bcryptjs: Library for hashing passwords securely.
 const bcrypt = require("bcryptjs");
 
+// cors: Middleware for enabling Cross-Origin Resource Sharing.
 const cors = require("cors");
 
+// fs: Node.js module for file system operations.
 const fs = require("fs");
 
+// Create an instance of the Express application
+// This is the main application object that will handle routing, middleware, and server setup.
 const app = express();
 
+// Middleware to parse incoming JSON payloads in request bodies
+// This allows the server to automatically parse JSON data sent in POST requests.
 app.use(express.json());
 
+// Middleware to enable CORS for all routes
+// This permits cross-origin requests, which is necessary for the frontend to communicate with this backend.
 app.use(cors());
 
+// Create a connection to the SQLite database file named "users.db"
+// If the file doesn't exist, SQLite will create it. This database will store all user data, connections, messages, etc.
 const db = new sqlite3.Database("users.db");
 
+// Read the SQL schema from the DataBase.sql file synchronously
+// This file contains the CREATE TABLE statements to set up the database structure.
 const sql = fs.readFileSync("DataBase.sql").toString();
 
+// Execute the SQL schema to initialize the database tables
+// If there's an error (e.g., syntax error in SQL), log it; otherwise, confirm successful setup.
 db.exec(sql, (err) => {
-
 if (err) console.log("Database error:", err);
-
 else console.log("Sqlite page running succsesfully");
-
 });
 
+// Define the POST route for user registration
+// This endpoint handles new user sign-ups by hashing the password and storing user data.
 app.post('/register', async (req, res) => {
-
-const { email, password} = req.body;
-
-const theme=0;
-
+const { email, password} = req.body;  // Extract email and password from request body
+const theme=0;  // Default theme value
+// Hash the password asynchronously with a cost factor of 10 (higher = more secure but slower)
 const hashedPassword = await bcrypt.hash(password, 10);
-
+// Insert the new user into the database
 db.run(
-
 "INSERT INTO users (email, password,theme) VALUES (?, ?, ?)",
-
 [email, hashedPassword,theme],
-
 function(err) {
-
   if (err) {
-
+    // If insertion fails (e.g., email already exists due to UNIQUE constraint), return error message
     return res.json({ message: "User already exists or error!" });
-
   }
-
+  // On success, return success message
   res.json({ message: "User registered successfully!" });
-
 }
-
 );
-
 });
 
+// Define the POST route for user login
+// This endpoint verifies user credentials and returns user data on successful login.
 app.post("/login", (req, res) => {
-
-const { email, password} = req.body;
-
+const { email, password} = req.body;  // Extract credentials from request
+// Query the database for the user with the given email
 db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
-
-if (!user) return res.json({ message: "User not found!" });
-
-
-
+if (!user) return res.json({ message: "User not found!" });  // User doesn't exist
+// Compare the provided password with the hashed password in the database
 const isMatch = bcrypt.compareSync(password, user.password);
-
 if (isMatch) {
-
+  // Password matches: return success message and user data (excluding password)
   res.json({ message: "Login successful!",
-
              user:{
-
                   id: user.id,
-
                  email: user.email,
-
                  theme: user.theme
-
                   }
-
-
-
    });
-
-} else { 
-
+} else {
+  // Password doesn't match
   res.json({ message: "Incorrect password!" });
-
 }
-
+});
 });
 
-});
-
+// Define the POST route to retrieve connections and requests data for a user
+// This endpoint fetches the user's friends (connections) and pending friend requests.
 app.post("/retreiveConnectionsData", (req, res) => {
-
-const userId = Number(req.body.userId);
-
+const userId = Number(req.body.userId);  // Get user ID from request
+// First, query for existing connections where the user is involved
 db.all(
-
 "SELECT userId, userId2 FROM connections WHERE userId = ? OR userId2 = ?",
-
 [userId, userId],
-
 (err, rows) => {
-
   if (err) return res.status(500).json({ message: "Database error" });
-
-
-
+  // Extract the IDs of connected users
   const connectionsIds = rows.map(row => (row.userId === userId ? row.userId2 : row.userId));
-
-
-
   if (connectionsIds.length === 0) {
-
-   
-
+    // No connections: just fetch pending requests
     db.all(
-
       "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
-
       [userId],
-
       (err, requests) => {
-
         if (err) return res.status(500).json({ message: "Database error" });
-
         return res.json({ Connections: [], Ids: [], Requests: requests });
-
       }
-
     );
-
     return;
-
   }
-
-
-
-  
-
+  // If there are connections, fetch user details for connected users
   const placeholders = connectionsIds.map(() => "?").join(",");
-
   db.all(`SELECT * FROM users WHERE id IN (${placeholders})`, connectionsIds, (err, connections) => {
-
     if (err) return res.status(500).json({ message: "Database error" });
-
-
-
-    
-
+    // Also fetch pending requests
     db.all(
-
       "SELECT requests.senderId, users.email FROM requests JOIN users ON requests.senderId = users.id WHERE receiverId = ?",
-
       [userId],
-
       (err, requests) => {
-
         if (err) return res.status(500).json({ message: "Database error" });
-
-
-
+        // Return connections and requests data
         res.json({
-
           Connections: connections,
-
           Ids: connectionsIds,
-
           Requests: requests
-
         });
-
       }
-
     );
-
   });
-
 }
-
 );
-
 });
 
+// Define the POST route to send a connection request
+// This allows users to send friend requests to other users.
 app.post("/sendConnctionRequest", (req, res) => {
 
 let { senderId, receiverId } = req.body;
@@ -198,10 +146,10 @@ receiverId = Number(receiverId);
 
 if (senderId === receiverId) {
 
-return res.json({ message: "You can't add yourself as a friend" });
+return res.json({ message: "You can't add yourself as a friend" });  // Prevent self-requests
 
 }
-
+// Check if they are already connected
 db.get(
 
 `SELECT userId, userId2 
@@ -217,8 +165,7 @@ db.get(
   if (err) return res.status(500).json({ message: "Database error" });
 
   if (connection) return res.json({ message: "This person is already your friend" });
-
-
+  // Check if a request already exists
 
 
 
@@ -233,10 +180,7 @@ db.get(
       if (err) return res.status(500).json({ message: "Database error" });
 
       if (existingRequest) return res.json({ message: "You already sent this person a request" });
-
-
-
-     
+      // Insert new request
 
       db.run(
 
@@ -264,10 +208,12 @@ db.get(
 
 });
 
+// Define the POST route to accept a friend request
+// This establishes a connection between users and removes the request.
 app.post("/acceptRequest", (req, res) => {
 
-const { userId, senderId } = req.body;
-
+const { userId, senderId } = req.body;  // userId is receiver, senderId is the one who sent request
+// Check if the request exists
 db.get(
 
 "SELECT * FROM requests WHERE senderId=? AND receiverId=?",
@@ -288,14 +234,10 @@ db.get(
 
 
 
-  
-
+  // Determine the order for connection (userId < userId2)
   const user1 = Math.min(userId, senderId); 
-
   const user2 = Math.max(userId, senderId);
-
-
-
+  // Insert into connections table
   db.run(
 
     "INSERT INTO connections(userId, userId2) VALUES(?, ?)",
@@ -305,11 +247,7 @@ db.get(
     function (err) {
 
       if (err) return res.status(500).json({ message: "Error adding friend" });
-
-
-
-      
-
+      // Delete the request after adding connection
       db.run(
 
         "DELETE FROM requests WHERE senderId=? AND receiverId=?",
@@ -338,16 +276,15 @@ db.get(
 
 });
 
+// Define the POST route to send a message
+// This stores a new message in the database.
 app.post("/sendMessage", (req, res) => {
 
 const { senderId, receiverId, message } = req.body;
-
 if (!message || message.trim() === "") {
-
-return res.json({ message: "Message cannot be empty" });
-
+return res.json({ message: "Message cannot be empty" });  // Validate message
 }
-
+// Insert message into database
 db.run(
 
 `INSERT INTO messages (senderId, receiverId, message) 
@@ -374,10 +311,12 @@ function (err) {
 
 });
 
+// Define the POST route to retrieve messages between two users
+// This fetches the chat history for a conversation.
 app.post("/getMessages", (req, res) => {
 
 const { userId, otherUserId } = req.body;
-
+// Query for messages where either user is sender/receiver
 db.all(
 
 `SELECT * FROM messages 
@@ -408,10 +347,9 @@ db.all(
 
 });
 
+// Start the server on the specified port
+// PORT is taken from environment variable or defaults to 3000
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-
 console.log("Server running on port " + PORT);
-
 });

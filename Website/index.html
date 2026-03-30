@@ -1,45 +1,59 @@
 <!DOCTYPE html>
+<!-- HTML document for the login page of Chat+ application -->
 <html lang="en">
 <head>
+   <!-- Preconnect to Google Fonts for faster loading -->
    <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Link to Google Fonts for custom fonts: DM Serif Text and Zalando Sans Expanded -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+<!-- Link to external CSS stylesheet for styling -->
 <link rel="stylesheet" href="index.css">
+    <!-- Meta tags for character encoding and responsive design -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat+</title>
 
+    <!-- Internal styles (currently empty) -->
     <style>
 
-        
+
     </style>
 </head>
-<body
-
-
->
+<body>
+    <!-- Main container for centering content -->
     <div class="container">
-    
+
+     <!-- Division for the login form with styling -->
      <div class="FormDiv">
+      <!-- Login form with ID for JavaScript handling -->
       <form class="login" id="login">
+        <!-- Application title -->
         <h1>Chat+</h1>
        <br>
+       <!-- Input field for email/username -->
        <input   id="email" placeholder="Enter Username" required >
        <br>
+       <!-- Input field for password -->
        <input type="password"  id="password" placeholder="Enter password" required >
        <br>
+        <!-- Submit button for login -->
         <button  class="btn"  type="submit" id="loginBtn">Login</button>
+       <!-- Paragraph for displaying messages (e.g., errors or success) -->
        <p id="message"></p>
+       <!-- Text prompting user to create account if they don't have one -->
        <p>Dont have an account?</p>
-       <button class="btn" type="button" id="CreateBtn" onclick="document.location='CreateAccount.html'">Create Account</button>    
-       
+       <!-- Button to navigate to create account page -->
+       <button class="btn" type="button" id="CreateBtn" onclick="document.location='CreateAccount.html'">Create Account</button>
+
       </form>
-    
+
 
      </div>
-    
+
     </div>
 </body>
+<!-- Include the Login.js script for handling login functionality -->
 <script src="Login.js">
 
 

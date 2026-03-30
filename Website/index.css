@@ -1,3 +1,5 @@
+/* Styles for html and body elements */
+/* Sets margin to 0, uses a background image, sets height to 0 (likely for full screen), covers the background, repeats it, and hides overflow */
 html,body{
           margin: 0;
           background-image: url("Resources/img/NEe6LB.png");
@@ -8,18 +10,26 @@ html,body{
           overflow: hidden;
          
         }
+
+/* Styles for paragraph elements */
+/* Sets color to white and font family to DM Serif Text */
         p{
           color: white;
            font-family: "DM Serif Text";
         }
         
 
+/* Styles for the login form */
+/* Uses flexbox to center align items vertically */
       .login{
        align-items: center;
        display: flex;
        flex-direction: column;
         
         }
+
+/* Styles for the form division */
+/* Adds gray background, border radius, absolute positioning, centers items, uses rgba background with blur effect, adds border and padding, positions top at 300px, sets width */
      .FormDiv{
        background-color: gray;
        border-radius: 20px;
@@ -32,6 +42,9 @@ html,body{
         top: 300px;
         width: 300px;
      }
+
+/* Styles for the container */
+/* Uses flexbox for centering, absolute positioning, sets full viewport height and width */
      .container{
      
         display: flex;
@@ -45,6 +58,9 @@ html,body{
 
 
      }
+
+/* Styles for button elements */
+/* Removes border style, sets height, font family, border radius, background color, and text color */
       button{
       
         border-style: none;
@@ -54,11 +70,17 @@ html,body{
            background-color: rgb(224, 0, 67);
            color: black;
       }
+
+/* Styles for h1 headings */
+/* Sets font family and color */
       h1{
           font-family: "DM Serif Text";
           color: rgb(210, 43, 43)	;
 
       }
+
+/* Styles for input elements */
+/* Sets border radius and removes border style, sets height */
         input{
 border-radius: 5px;
 border-style: none;
