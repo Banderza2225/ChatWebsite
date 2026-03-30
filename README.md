@@ -38,8 +38,10 @@ The purpose of this project is to demonstrate understanding of web development c
 
 #### Local Use
 
-if you want to run and use it locally follow these steps:
 
+If you want to run and use it locally follow these steps:
+
+*Running it locally will not allow you to access the online database
 Go to the main repo page and press the code button then dowloand the zip file,the file should start downloading :
 
 <img width="1916" height="784" alt="Screenshot 2026-03-28 185833" src="https://github.com/user-attachments/assets/75d42a46-afed-4afa-8f89-26c27b16e4d3" />
