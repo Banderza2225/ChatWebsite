@@ -78,6 +78,21 @@ The website is running and ready for you to use:
 - Messages will appear in the chat window
 
 
+<img width="1919" height="941" alt="Screenshot 2026-03-30 160709" src="https://github.com/user-attachments/assets/d236b21e-8a66-44c0-a5fa-c709b01d1817" />
+<img width="1919" height="943" alt="Screenshot 2026-03-30 160725" src="https://github.com/user-attachments/assets/00f90f2b-0819-4cfa-91c0-94df44442ecf" />
+<img width="1919" height="945" alt="Screenshot 2026-03-30 160804" src="https://github.com/user-attachments/assets/ec01bc24-bbf2-4978-b642-37981f8d7be2" />
+<img width="1919" height="937" alt="Screenshot 2026-03-30 160822" src="https://github.com/user-attachments/assets/13a60084-be29-40b6-b5a3-b1a5e6d8e454" />
+<img width="1915" height="940" alt="Screenshot 2026-03-30 160850" src="https://github.com/user-attachments/assets/c7d57d7d-0f42-42bd-b6c8-cbfa55e6f762" />
+<img width="1911" height="953" alt="Screenshot 2026-03-30 160913" src="https://github.com/user-attachments/assets/6ab6d2e8-a3f9-4601-a019-ed71db0e7479" />
+<img width="1919" height="927" alt="Screenshot 2026-03-30 161041" src="https://github.com/user-attachments/assets/1a23b66a-fda0-447a-94bd-fb44336edb3f" />
+<img width="1919" height="1028" alt="Screenshot 2026-03-30 161051" src="https://github.com/user-attachments/assets/741eccba-c5be-45ea-a92c-e115c1a600fe" />
+<img width="1919" height="1027" alt="Screenshot 2026-03-30 161159" src="https://github.com/user-attachments/assets/8e840ce4-e46b-49e0-9408-ef3681e5e5d0" />
+
+  
+
+
+
+
 ## AI Acknowledgment
 
 - **ChatGPT**: Used to help debug JavaScript issues and structure the project
