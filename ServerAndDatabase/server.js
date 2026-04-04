@@ -11,8 +11,7 @@ const bcrypt = require("bcryptjs");
 // cors: Middleware for enabling Cross-Origin Resource Sharing, allowing frontend-backend communication.
 const cors = require("cors");
 
-// dns: Node.js module for DNS lookups, used here to resolve IPv4 address for database host.
-const dns = require("dns");
+
 
 // Create an instance of the Express application
 // This is the main application object that will handle routing, middleware, and server setup.
@@ -25,30 +24,16 @@ app.use(express.json());
 // Enable CORS for all routes to permit cross-origin requests from the frontend.
 app.use(cors());
 
-// Database configuration
-// Credentials for connecting to the Supabase PostgreSQL database.
-// Note: In production, use environment variables for sensitive data like passwords.
-const DB_USER = "postgres";
-const DB_PASSWORD = "&a5La_?GvrhjJE#"; // Supabase database password
-const DB_NAME = "postgres";
-const DB_HOST = "db.faopqgtksrcwsbpevosm.supabase.co";
-const DB_PORT = 5432;
-
-// Initialize database connection pool after resolving IPv4 address
-// DNS lookup ensures compatibility with IPv4-only environments I need to do this because render does not support IPv6.
-let pool;
-dns.lookup(DB_HOST, { family: 4 }, (err, address) => {
-  if (err) throw err;
-
-  // Create a connection pool with the resolved IPv4 address
-  pool = new Pool({
-    host: address,
-    port: DB_PORT,
-    user: DB_USER,
-    password: DB_PASSWORD,
-    database: DB_NAME,
-    ssl: { rejectUnauthorized: false } // Allow self-signed certificates for Supabase
-  });
+const pool = new Pool({
+  user: "postgres",
+  password: "&a5La_?GvrhjJE#",
+  host: "db.faopqgtksrcwsbpevosm.supabase.co",
+  database: "postgres",
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // Database initialization function
 // Creates necessary tables if they don't exist, ensuring the database schema is set up on server startup.
@@ -259,4 +244,3 @@ app.post("/getMessages", async (req, res) => {
 // Start the Express server on the specified port, defaulting to 3000 if not set in environment.
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on port " + PORT));
-});
