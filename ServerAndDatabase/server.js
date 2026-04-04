@@ -44,8 +44,8 @@ dns.lookup(DB_HOST, { family: 4 }, (err, address) => {
     ssl: { rejectUnauthorized: false }
   });
 
-  pool.query("SELECT NOW()").then(res => console.log("Connected!", res.rows[0])).catch(console.error);
-});
+  
+
 
 // Database initialization function
 // Creates necessary tables if they don't exist, ensuring the database schema is set up on server startup.
@@ -256,3 +256,5 @@ app.post("/getMessages", async (req, res) => {
 // Start the Express server on the specified port, defaulting to 3000 if not set in environment.
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on port " + PORT));
+
+});
