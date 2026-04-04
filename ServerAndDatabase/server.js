@@ -24,15 +24,27 @@ app.use(express.json());
 // Enable CORS for all routes to permit cross-origin requests from the frontend.
 app.use(cors());
 
-const pool = new Pool({
-  user: "postgres",
-  password: "&a5La_?GvrhjJE#",
-  host: "db.faopqgtksrcwsbpevosm.supabase.co",
-  database: "postgres",
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false
-  }
+const dns = require("dns");
+
+const DB_USER = "postgres";
+const DB_PASSWORD = "&a5La_?GvrhjJE#";
+const DB_NAME = "postgres";
+const DB_HOST = "db.faopqgtksrcwsbpevosm.supabase.co";
+const DB_PORT = 5432;
+
+dns.lookup(DB_HOST, { family: 4 }, (err, address) => {
+  if (err) throw err;
+
+  const pool = new Pool({
+    user: DB_USER,
+    password: DB_PASSWORD,
+    host: address,      // IPv4 forced
+    database: DB_NAME,
+    port: DB_PORT,
+    ssl: { rejectUnauthorized: false }
+  });
+
+  pool.query("SELECT NOW()").then(res => console.log("Connected!", res.rows[0])).catch(console.error);
 });
 
 // Database initialization function
