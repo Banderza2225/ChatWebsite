@@ -103,6 +103,7 @@ The website is running and ready for you to use:
 - **ChatGPT**: Assisted in writing parts of the README and explaining concepts like event listeners and DOM manipulation
 - **Chatgpt**: Used heavily for researching and learning about new technologies and how to implement them into the code
 - **Copilot**: Used to review read.me
+- **Copilot**:Used for adding comments
 
 
 ## Version Control
