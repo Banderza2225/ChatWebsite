@@ -17,6 +17,8 @@ const fs = require("fs");
 // This is the main application object that will handle routing, middleware, and server setup.
 const app = express();
 
+
+
 // Middleware to parse incoming JSON payloads in request bodies
 // This allows the server to automatically parse JSON data sent in POST requests.
 app.use(express.json());

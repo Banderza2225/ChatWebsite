@@ -19,6 +19,7 @@ The purpose of this project is to demonstrate understanding of web development c
 - SQLite (only if you run it locally)
 - Node.js
 - Render(For hosting server)
+- Supabase(For Database)
 #### Dependancies:
 - pg (to access PostgreSQL database)
 - bcryptjs (For encypting and checking passwords)
